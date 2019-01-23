@@ -10,7 +10,7 @@
 * 在说什么是APP架构之前，我先问一个问题，APP中最核心的两个元素是什么？
 * 在APP中最核心的两个元素就是数据和界面，APP其实就是将数据展现在界面上，然后通过对界面的操作来操作数据。这么一系列操作就是APP的反馈回路。
 
-![image-20190122143047155](/Users/ancheng/Library/Application Support/typora-user-images/image-20190122143047155.png)
+![image-20190122143047155](https://raw.githubusercontent.com/ChaselAn/dev-blog/master/Source/ModelAndView.png)
 
 * 上图就是APP的反馈回路简图。View代表着界面，项目里所有继承自UIView的控件都可以看做是View，Model代表着单一数据或者是数据管理中心。View负责将数据展示出来，当View发生了操作（View Action），通过一系列内部逻辑（Model Action）改变了数据Model，Model发生改变之后再通知（Change Notification）View去更新（View Update）。这就是一套完整的APP反馈回路。
 
