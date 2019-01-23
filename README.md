@@ -8,3 +8,5 @@
 
 ## 更新记录
 
+[更新日志](https://github.com/ChaselAn/dev-blog/blob/master/%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97.md)
+
