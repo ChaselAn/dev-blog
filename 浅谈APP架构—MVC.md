@@ -2,6 +2,7 @@
 
 * 本文以iOS为例，Android大佬请自行理解
 * 本文将简单讲讲关于APP架构的理解，以及对MVC的认识，对于iOS另一比较流行的MVVM-Rx架构会在后面为大家解析。
+* [本文的demo地址](https://github.com/ChaselAn/iOSArchitecturesDemo)
 
 ## 什么是APP架构
 
@@ -129,5 +130,117 @@
 
 ## 网络层应该放在哪里
 
-<未完待续>
+* 上面的例子都是以操作本地数据为例，如果集成网络层，数据都是通过请求获得，网络层应该写在哪里比较好？
+* 网络层在MVC模式中，通常有两种处理方式，放在Controller层或者放在Model层。二者有什么区别呢？
 
+### Controller层持有网络
+
+* 网络层如果放在Controller层，数据直接从网络获取，数据保存的内存中，不会被持久化，因为不同的Controller获取的数据可能都不相同，Controller持有自己的数据，相互独立。
+
+* 在Controller层持有网络中，View Controller负责进行网络请求。它们同时也拥有通过这些请求所加载的数据。同时，这也意味着项目可以没有Model层了，因为每个View Controller管理着它自己的数据，数据在View Controller中被引用。在Controller中持有网络，会比较容易快速的管理数据。
+
+* ~~在Controller层持有网络中，数据模型建议使用结构体Struct。因为结构体是值语义，数据在复制的时候是深拷贝的（这里的深拷贝是忽略写实复制技术的一种说法），在不同View Controller中传递时，相对较为安全。操作了其他View Controller中的数据，不会对当前的View Controller做改变。~~
+
+  ```swift
+      private var repos: [MVCNetworkRepository] = [] {
+          didSet {
+              tableView.reloadData()
+          }
+      }
+  
+      override func viewDidLoad() {
+          super.viewDidLoad()
+  
+          makeUI()// do something for UI
+  
+          showHud()
+          URLSession.shared.dataTask(with: URL(string: "https://api.github.com/users/ChaselAn/repos")!) { [weak self] (data, _, _) in
+              DispatchQueue.main.async { [weak self] in
+                  guard let strongSelf = self else { return }
+                  strongSelf.hideHud()
+                  guard let data = data, let repos = try? JSONDecoder().decode([MVCNetworkRepository].self, from: data) else {
+                      let alert = UIAlertController(title: "request error", message: nil, preferredStyle: .alert)
+                      alert.addAction(UIAlertAction(title: "ok", style: .default, handler: nil))
+                      strongSelf.present(alert, animated: true, completion: nil)
+                      return
+                  }
+                  self?.repos = repos
+              }
+          }.resume()
+      }
+  ```
+
+### Model层持有网络
+
+* 那么Controller层持有网络有什么缺点呢？
+
+* Controller层持有网络时，每个View Controller相对独立，在数据共享方面都是主动的去传递数据，新的数据必须要主动的传递给其他依赖他的View Controller。这种手动的传递数据让数据保证一致变得比较困难，如果使用了结构体作为数据模型，数据同步之间可能还会出现问题。
+
+* Model层持有网络的情况下，可以解决数据传递的问题，还可以比较方便的做数据持久化。
+
+* 和Controller持有网络相似，都是在View Controller中区获取数据。
+
+  ```swift
+      private var repoList = MVCNetworkStore.shared.model
+  
+      override func viewDidLoad() {
+          super.viewDidLoad()
+  
+          makeUI()// do something for UI
+  
+          showHud()
+          repoList.load { [weak self] (res) in
+              guard let strongSelf = self else { return }
+              strongSelf.hideHud()
+              switch res {
+              case .success:
+                  break
+              case .failure:
+                  let alert = UIAlertController(title: "request error", message: nil, preferredStyle: .alert)
+                  alert.addAction(UIAlertAction(title: "ok", style: .default, handler: nil))
+                  strongSelf.present(alert, animated: true, completion: nil)
+              }
+          }
+      }
+  ```
+
+* 而真正的数据请求是在Model层的load方法中
+
+  ```swift
+  class MVCNetworkRepos: Codable {
+      var repos: [MVCNetworkRepo]
+      init(repos: [MVCNetworkRepo]) {
+          self.repos = repos
+      }
+      
+      enum Result {
+          case success
+          case failure(Error?)
+      }
+  
+      func load(completion: @escaping (Result) -> Void) {
+          URLSession.shared.dataTask(with: URL(string: "https://api.github.com/users/ChaselAn/repos")!) { (data, _, error) in
+              DispatchQueue.main.async {
+                  guard let data = data else {
+                      completion(.failure(error))
+                      return
+                  }
+                  do {
+                      let repos = try JSONDecoder().decode([MVCNetworkRepo].self, from: data)
+                      self.repos = repos
+                      mvcNetStateStore.dispatch(.reload)
+                      completion(.success)
+                  } catch {
+                      completion(.failure(error))
+                  }
+              }
+          }.resume()
+      }
+  }
+  ```
+
+* `mvcNetStateStore.dispatch(.reload)`这一句是通知Store去做数据持久化，并且通知View Controller进行UI变更。
+
+### 总结
+
+* 当我们的数据不会在不同的View Controller之间共享的时候，我们可以使用Controller层持有网络。但是随着我们业务逻辑的不断变更，Controller会一直保持数据不会共享吗？所以我们还是推荐选择Model层持有网络，保证数据的一致性，并且减少Controller的臃肿。
