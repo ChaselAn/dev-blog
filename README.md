@@ -6,7 +6,7 @@
 
 [浅谈APP架构—MVC](https://github.com/ChaselAn/dev-blog/blob/master/%E6%B5%85%E8%B0%88APP%E6%9E%B6%E6%9E%84%E2%80%94MVC.md)
 
-[IAP接入与丢单处理](https://github.com/ChaselAn/dev-blog/blob/master/IAP%E6%8E%A5%E5%85%A5%E4%B8%8E%E8%B8%A9%E5%9D%91.md)
+[IAP接入与丢单处理](https://github.com/ChaselAn/dev-blog/blob/master/IAP%E6%8E%A5%E5%85%A5%E4%B8%8E%E4%B8%A2%E5%8D%95%E5%A4%84%E7%90%86.md)
 
 ## 更新记录
 
