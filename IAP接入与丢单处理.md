@@ -1,4 +1,4 @@
-# IAP接入与踩坑
+# IAP接入与丢单处理
 
 * 本文只记录消耗型项目的内购，非消耗型和订阅型项目没有接触过，暂不记录
 
@@ -32,7 +32,7 @@
 
   商品的信息是在代理方法`func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse)`中获得。
 
-* 第四步：拿到商品信息后，生成账单，将账单放入账单队列中。
+* 第四步：拿到商品信息后，生成账单（SKPayment），将账单放入账单队列中。
 
   ```swift
       public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
@@ -100,5 +100,31 @@
 
 ## IAP丢单处理
 
-<未完待续>
+### 什么是IAP丢单？
+
+* IAP丢单就是用户付了钱，却没有收到货。
+
+### 丢单是怎么造成的？
+
+* 首先用户付款是在上面流程的第四步，用户付完款之后才会收到第五步的回调，如果我们在第四步用户付完款之后，后面的流程没有走或者出现了问题，就会造成丢单。
+* 比如第六步中我们去苹果服务器请求收据出现断网情况，第七步中我们请求自家服务器出现断网情况，都无法通知服务端去校验交易入账，就无法给用户充值。
+
+### 如何处理丢单？
+
+* 在丢单是怎么造成的里面，我已经说过，丢单是因为第四步之后出现了问题，那么怎么处理呢？大家可以看一下第七步，在检验成功之后，我们会调用`SKPaymentQueue.default().finishTransaction(transaction)`方法，也就是说，在丢单情况下，我们是不会调用finish方法的。在第五步最后我已经说过，如果我们没有调用finish方法，这个账单会一直保存在账单队列中。
+* 这样我们就有办法去解决丢单问题了，我们可以再合适的时候，移除账单队列的观察者，重新添加观察者，我们在重新添加观察者的时候，如果账单队列中有未完成的账单，会立即收到`func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction])`的事务回调，如果是已经付款的丢单，会回调一个state为purchased的事务，这个时候在去将丢的账单重新发给服务端校验就可以了。什么是合适的时候去重新添加观察者呢？这个可以根据需求来定，可以再应用启动的时候，或者在下一次充值之前，或者网络状态切换的时候都可以。
+
+### 怎么分辨丢的账单是否是当前用户？
+
+* 如果用户在应用内有多个账号，我们怎么去确定，丢的账单是不是当前用户呢？
+
+* 在IAP流程的第四步中，我们在生成账单时，可以看到SKPayment类中有一个属性可以供我们解决这个问题，就是`applicationUsername`属性，我们可以将当前用户的标识或者ID存到这个属性中。当然这个属性在SKPayment类中是只读类型，我们要用的是`SKMutablePayment`类。第四步生成账单的代码就要改成：
+
+  ```swift
+      let payment = SKMutablePayment(product: products[0])
+      payment.applicationUsername = userID
+      SKPaymentQueue.default().add(payment)
+  ```
+
+  同时在第六步处理付款成功的方法中去判断`applicationUsername`与当前用户的标识是否一致，一致的话才去处理丢单的校验。
 
