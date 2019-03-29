@@ -31,3 +31,44 @@
 
 * rebase 之后不要用 push -f (force) 而是尽量用 --force-with-lease 来代替
   [https://www.oschina.net/translate/12-git-tips-gits-12th-birthday](https://www.oschina.net/translate/12-git-tips-gits-12th-birthday)详见该文章的第6条
+
+# Cocoapods
+
+* Pod版本1.5.3升级到1.6.1之后，如果项目中是多target的模式，或者多framework的模式，在Podfile文件中需要将其他target(framework)用到的pod库也添加到主target中。
+
+  ```ruby
+  # 主target
+  target 'App' do
+    pod 'EasyPeasy'
+  end
+  
+  # 其他的target(framework)
+  target 'Data' do
+    pod 'Alamofire'
+  end
+  ```
+
+  ——————————>
+
+  ```ruby
+  # 主target
+  target 'App' do 
+    pod 'EasyPeasy'
+    pod 'Alamofire'
+  end
+  
+  # 其他的target(framework)
+  target 'Data' do
+    pod 'Alamofire'
+  end
+  ```
+
+  如果不添加可能会报下面两种错误：
+
+  1.`ld: framework not found 'Alamofire'`
+
+  2.`dyld: Library not loaded: @rpath/Alamofire.framework/Alamofire`
+
+    `Referenced from: /Users/chaselan/Library/Developer/Xcode/DerivedData/App-dxkseibbwfgjgtabcdefgzpsfogf/Build/Products/Debug-iphonesimulator/Data.framework/Data`
+
+   `Reason: image not found`
