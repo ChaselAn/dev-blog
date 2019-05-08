@@ -12,6 +12,8 @@
 
 * 集合类型的线程安全问题：Swift中集合类型内部并没有自带读写的线程安全，当涉及到多线程的读写时，需要自己控制线程安全。
 
+* Swift4.2的项目升级Swift5.0时，笔者猜测，Swift4.2版本中集合类型读写可能做了一些线程安全的锁(只是猜测，有兴趣的话可以去看下源码)，Swift5.0可能为了性能移除了这些，导致项目中如果之前没有控制集合类型的线程安全，Swift5.0崩溃率会大幅增高，所以升级项目时一定要告知测试组同学，做好压力测试等，避免不必要的崩溃。
+
 # Texture
 
 * <version 2.6>如果给ASTextNode同时设置了maximumLine和paragraphStyle的lineSpacing，lineSpacing不会生效，可以使用lineHeightMultiple代替，或者使用ASTextNode2代替。
@@ -19,13 +21,11 @@
 
 * <version 2.6,iOS 11.3>Texture里的ASTextNode如果实现了
 
-```objective-c
-- (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
-```
+  ```swift
+  - (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
+  ```
 
-为true时，如果点击了一个不带有link的attribute的区域，会crash
-可以考虑自定义一个longPressGesture来实现自己的功能。
-此条记录的texture pod版本号为2.6
+  为true时，如果点击了一个不带有link的attribute的区域，会crash。可以考虑自定义一个longPressGesture来实现自己的功能。
 
 * <version 2.7,iOS 11.4>ASTableNode的机制是每次刷新数据源时，都会创建新的ASCellNode，将旧的ASCellNode释放掉，然而，测试发现，tableNode会hold住两次cellNode，当第二次刷新的时候，才会释放掉第一次本应该释放的cellNode，注意此处的坑，当cellNode监听某些事件时，不要以为只有当前的cellNode在监听，之前还没释放的并且不再界面上显示的那个cellNode也在监听，监听操作中建议使用tableNode.visibleNodes.contains(self)判断一下再去做操作。
 
