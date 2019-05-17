@@ -33,6 +33,7 @@
 
 * rebase 之后不要用 push -f (force) 而是尽量用 --force-with-lease 来代替
   [https://www.oschina.net/translate/12-git-tips-gits-12th-birthday](https://www.oschina.net/translate/12-git-tips-gits-12th-birthday)详见该文章的第6条
+* revert操作后再次merge，代码会有被冲掉的问题，revert需谨慎
 
 # Cocoapods
 
