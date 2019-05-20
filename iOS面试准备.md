@@ -91,3 +91,70 @@
 
 * 堆排序数据访问的方式没有快排友好。快排数据是顺序访问，堆排序数据是跳着访问，对CPU缓存不友好。
 * 对于同样的数据，在排序过程中，堆排序算法的数据交换次数要多于快排
+
+# iOS相关
+
+## 性能优化
+
+### 卡顿解决的主要思路：
+
+- 尽可能减少CPU、GPU资源消耗
+- 按照60FPS的刷帧率，每隔16ms就会有一次VSync信号
+- 尽量用轻量级的对象，比如用不到事件处理的地方，可以考虑使用CALayer取代UIView
+- 不要频繁地调用UIView的相关属性，比如frame、bounds、transform等属性，尽量减少不必要的修改
+- 尽量提前计算好布局，在有需要时一次性调整对应的属性，不要多次修改属性
+- Autolayout会比直接设置frame消耗更多的CPU资源
+- 图片的size最好刚好跟UIImageView的size保持一致
+- 控制一下线程的最大并发数量
+- 尽量把耗时的操作放到子线程
+- 文本处理（尺寸计算、绘制）
+- 图片处理（解码、绘制）
+- 尽量避免短时间内大量图片的显示，尽可能将多张图片合成一张进行显示
+- GPU能处理的最大纹理尺寸是4096x4096，一旦超过这个尺寸，就会占用CPU资源进行处理，所以纹理尽量不要超过这个尺寸
+- 尽量减少视图数量和层次
+- 减少透明的视图（alpha<1），不透明的就设置opaque为YES
+- 尽量避免出现离屏渲染
+- [iOS 保持界面流畅的技巧](https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/)
+
+### 离屏渲染
+
+在OpenGL中，GPU有2种渲染方式：
+
+- On-Screen Rendering：当前屏幕渲染，在当前用于显示的屏幕缓冲区进行渲染操作
+- Off-Screen Rendering：离屏渲染，在当前屏幕缓冲区以外新开辟一个缓冲区进行渲染操作
+
+离屏渲染消耗性能的原因
+
+- 需要创建新的缓冲区
+- 离屏渲染的整个过程，需要多次切换上下文环境，先是从当前屏幕（On-Screen）切换到离屏（Off-Screen）；等到离屏渲染结束以后，将离屏缓冲区的渲染结果显示到屏幕上，又需要将上下文环境从离屏切换到当前屏幕
+
+哪些操作会触发离屏渲染？
+
+* 官方公开的的资料里关于离屏渲染的信息最早是在 2011年的 WWDC， 在多个 session 里都提到了尽量避免会触发离屏渲染的效果，包括：mask, shadow, group opacity, edge antialiasing。
+* 光栅化，layer.shouldRasterize = YES
+* 遮罩，layer.mask
+* 圆角，同时设置layer.masksToBounds = YES、layer.cornerRadius大于0
+* 考虑通过CoreGraphics绘制裁剪圆角，或者叫美工提供圆角图片
+* 阴影，layer.shadowXXX
+* 如果设置了layer.shadowPath就不会产生离屏渲染
+
+### Swift特性方面优化
+
+多用结构体，类中尽量用final修饰。结构体和final修饰的方法底层会使用直接派发的方式调用，效率极高，其他方法使用函数表派发方式调用，OC使用消息表派发方式调用。
+
+[<http://www.starming.com/2018/01/24/why-swift/>](<http://www.starming.com/2018/01/24/why-swift/>)
+
+## app启动
+
+新建一个 Swift 的 iOS app 项目后，我们会发现所有文件中都没有一个像 Objective-C 时那样的 main 文件，也不存在 main 函数。唯一和 main 有关系的是在默认的 AppDelegate 类的声明上方有一个 @UIApplicationMain 的标签。不说可能您也已经猜到，这个标签做的事情就是将被标注的类作为委托，去创建一个 UIApplication 并启动整个程序。在编译的时候，编译器将寻找这个标记的类，并自动插入像 main 函数这样的模板代码。
+
+# 设计模式
+
+[面向对象六大原则](<https://www.cnblogs.com/qifengshi/p/5709594.html>)
+
+* 单一职责原则——SRP
+* 开闭原则——OCP
+* 里式替换原则——LSP
+* 依赖倒置原则——DIP
+* 接口隔离原则——ISP
+* 迪米特原则——LOD
