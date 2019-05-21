@@ -140,9 +140,7 @@
 
 ### Swift特性方面优化
 
-多用结构体，类中尽量用final修饰。结构体和final修饰的方法底层会使用直接派发的方式调用，效率极高，其他方法使用函数表派发方式调用，OC使用消息表派发方式调用。
-
-[<http://www.starming.com/2018/01/24/why-swift/>](<http://www.starming.com/2018/01/24/why-swift/>)
+多用结构体，类中尽量用final修饰。结构体和final修饰的方法底层会使用直接派发的方式调用，效率极高，其他方法使用函数表派发方式调用，OC使用消息表派发方式调用。([<http://www.starming.com/2018/01/24/why-swift/>](<http://www.starming.com/2018/01/24/why-swift/>)）
 
 ## app启动
 
