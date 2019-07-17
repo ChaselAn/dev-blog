@@ -10,7 +10,7 @@
 
 [通过Cocoapods在iOS项目中集成Flutter](https://github.com/ChaselAn/dev-blog/blob/master/%E9%80%9A%E8%BF%87Cocoapods%E5%9C%A8iOS%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%9B%86%E6%88%90Flutter.md)
 
-[每日单词]([https://github.com/ChaselAn/dev-blog/blob/master/%E6%AF%8F%E6%97%A5%E5%8D%95%E8%AF%8D.md](https://github.com/ChaselAn/dev-blog/blob/master/每日单词.md))
+[每日单词](https://github.com/ChaselAn/dev-blog/blob/master/%E6%AF%8F%E6%97%A5%E5%8D%95%E8%AF%8D.md)
 
 ## 更新记录
 
