@@ -75,3 +75,24 @@
     `Referenced from: /Users/chaselan/Library/Developer/Xcode/DerivedData/App-dxkseibbwfgjgtabcdefgzpsfogf/Build/Products/Debug-iphonesimulator/Data.framework/Data`
 
    `Reason: image not found`
+  
+# Jenkins
+
+## You cannot run CocoaPods as root问题
+
+* 在`centos`环境中配置`jenkins`的时候，通过`rubygem`安装了`cocoapods`，如果是root用户，执行`pod`命令时，会报`You cannot run CocoaPods as root`的错误，这个时候需要使用其他用户来执行`pod`命令。
+  
+* 如果`jenkins`的配置文件中的`JENKINS_USER`也是root的话，再执行`jenkins`自动打包的`shell`脚本里，`pod`命令就会报上面的错误，因为你的`jenkins`是用root用户的来执行的，但是root用户又无法执行`pod`命令
+  
+* 解决方案：将`/etc/sysconfig/jenkins`目录的配置文件的`JENKINS_USER`值改成其他用户，比如改成默认的jenkins用户，同时修改目录的相应权限：
+  
+  ```ruby
+    sudo chown -R 用户名(比如修改后的jenkins) /var/log/jenkins
+    sudo chgrp -R 用户名 /var/log/jenkins
+    sudo chown -R 用户名 /var/lib/jenkins 
+    sudo chgrp -R 用户名 /var/lib/jenkins
+    sudo chown -R 用户名 /var/cache/jenkins
+    sudo chgrp -R 用户名 /var/cache/jenkins
+  ```
+  
+    
