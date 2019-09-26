@@ -16,8 +16,8 @@
 
 # Texture
 
-* <version 2.6>如果给ASTextNode同时设置了maximumLine和paragraphStyle的lineSpacing，lineSpacing不会生效，可以使用lineHeightMultiple代替，或者使用ASTextNode2代替。
-  But！ASTextNode2会有一些其他的问题，例如其他控件响应失效。
+* ~~<version 2.6>如果给ASTextNode同时设置了maximumLine和paragraphStyle的lineSpacing，lineSpacing不会生效，可以使用lineHeightMultiple代替，或者使用ASTextNode2代替。
+  But！ASTextNode2会有一些其他的问题，例如其他控件响应失效。~~
 
 * <version 2.6,iOS 11.3>Texture里的ASTextNode如果实现了
 
@@ -28,6 +28,22 @@
   为true时，如果点击了一个不带有link的attribute的区域，会crash。可以考虑自定义一个longPressGesture来实现自己的功能。
 
 * <version 2.7,iOS 11.4>ASTableNode的机制是每次刷新数据源时，都会创建新的ASCellNode，将旧的ASCellNode释放掉，然而，测试发现，tableNode会hold住两次cellNode，当第二次刷新的时候，才会释放掉第一次本应该释放的cellNode，注意此处的坑，当cellNode监听某些事件时，不要以为只有当前的cellNode在监听，之前还没释放的并且不再界面上显示的那个cellNode也在监听，监听操作中建议使用tableNode.visibleNodes.contains(self)判断一下再去做操作。
+
+* <version 2.8.1,iOS 12.3>使用`transitionLayout(withAnimation: Bool, shouldMeasureAsync: Bool, measurementCompletion: (() -> Void)?)`方法重新布局node时，如果使用shouldMeasureAsync为true进行异步layout时，在前面去修改子node的属性时，有可能会失败，例如
+
+  ```swift
+      func setMemberActionType(_ type: MemberActionType) {
+          switch type {
+          case .add:
+              lastMemberNode.image = .iconConversationMembersAdd // image的修改可能会失败
+          case .see:
+              lastMemberNode.image = .iconConversationMembersSee // image的修改可能会失败
+          }
+          transitionLayout(withAnimation: true, shouldMeasureAsync: true, measurementCompletion: nil)
+      }
+  ```
+
+  解决方案是使用shouldMeasureAsync为false的同步layout，或者在将修改node的属性的代码放在`DispatchQueue.main.async {}`中
 
 # Git
 
