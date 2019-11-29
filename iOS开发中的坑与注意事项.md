@@ -12,7 +12,22 @@
 
 * 集合类型的线程安全问题：Swift中集合类型内部并没有自带读写的线程安全，当涉及到多线程的读写时，需要自己控制线程安全。
 
-* Swift4.2的项目升级Swift5.0时，笔者猜测，Swift4.2版本中集合类型读写可能做了一些线程安全的锁(只是猜测，有兴趣的话可以去看下源码)，Swift5.0可能为了性能移除了这些，导致项目中如果之前没有控制集合类型的线程安全，Swift5.0崩溃率会大幅增高，所以升级项目时一定要告知测试组同学，做好压力测试等，避免不必要的崩溃。
+* <iOS 12>iOS12中，使用同一个webView加载不同的页面时，比如先load一个页面，然后stopLoading，重新load一个新的页面，偶现在didFailProvisionalNavigation代理中返回`Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort"`错误，并且不走didFinish的代理。处理方式：可以捕捉这个错误，进行重新reload。
+
+  ```swift
+  func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+          if let posixError = (error as? POSIXError), posixError.code == .ECONNABORTED {
+  //            Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort"
+              // ios 12中会出现这个错误，导致webView报错时不返回finish的代理，导致UI一直转菊花中
+              DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                  webView.reload()
+              }
+              return
+          }
+      }
+  ```
+
+* <iOS 13>如果UITableViewCell中有UIActivityIndicatorView，并且当indicator正在转动的时候，该cell划出了屏幕，会调用stopAnimating方法，会导致indicator停止转动，甚至消失(前提是hidesWhenStopped为true)。解决方法：记一个状态，在cell重新出现的时候，如果需要还没转完，重新调用startAnimating方法。
 
 # Texture
 
@@ -44,6 +59,8 @@
   ```
 
   解决方案是使用shouldMeasureAsync为false的同步layout，或者在将修改node的属性的代码放在`DispatchQueue.main.async {}`中
+  
+* <version 2.8.1,iOS 13>在ASCellNode中添加一个ASButtonNode，如果频繁的对buttonNode设置图片，有图片消失并且设置不成功的可能，如果出现此问题，建议使用ASImageNode添加手势来实现功能。
 
 # Git
 
