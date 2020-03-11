@@ -29,6 +29,15 @@
 
 * <iOS 13>如果UITableViewCell中有UIActivityIndicatorView，并且当indicator正在转动的时候，该cell划出了屏幕，会调用stopAnimating方法，会导致indicator停止转动，甚至消失(前提是hidesWhenStopped为true)。解决方法：记一个状态，在cell重新出现的时候，如果需要还没转完，重新调用startAnimating方法。
 
+* <iOS 13>UITableView在reloadSections的时候，会发现contentOffset会跳动。解决方案是设置estimateheight：
+
+  ```swift
+  tableView.estimatedRowHeight = 0
+  tableView.estimatedSectionHeaderHeight = 0
+  tableView.estimatedSectionFooterHeight = 0
+  // 三个值都需要设置
+  ```
+
 # Texture
 
 * ~~<version 2.6>如果给ASTextNode同时设置了maximumLine和paragraphStyle的lineSpacing，lineSpacing不会生效，可以使用lineHeightMultiple代替，或者使用ASTextNode2代替。
