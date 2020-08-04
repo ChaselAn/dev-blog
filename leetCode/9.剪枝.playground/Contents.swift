@@ -209,6 +209,45 @@ extension Solution {
  */
 extension Solution {
     func isValidSudoku(_ board: [[Character]]) -> Bool {
+        var colMap = [Int: Set<Character>]()
+        var threeMap = [Int: Set<Character>]()
+        for (rowIndex, row) in board.enumerated() {
+            var rowSet = Set<Character>()
+            for (colIndex, col) in row.enumerated() {
+                if (rowIndex == 3 || rowIndex == 6) && colIndex == 0 {
+                    threeMap = [:]
+                }
+                if col == "." { continue }
+                if rowSet.contains(col) {
+                    return false
+                } else {
+                    rowSet.insert(col)
+                }
+                if let colSet = colMap[colIndex] {
+                    if colSet.contains(col) {
+                        return false
+                    } else {
+                        var newColSet = colSet
+                        newColSet.insert(col)
+                        colMap[colIndex] = newColSet
+                    }
+                } else {
+                    colMap[colIndex] = Set<Character>([col])
+                }
+                let threeIndex = colIndex / 3
+                if let threeSet = threeMap[threeIndex] {
+                    if threeSet.contains(col) {
+                        return false
+                    } else {
+                        var newThreeSet = threeSet
+                        newThreeSet.insert(col)
+                        threeMap[threeIndex] = newThreeSet
+                    }
+                } else {
+                    threeMap[threeIndex] = Set<Character>([col])
+                }
+            }
+        }
         return true
     }
 }
@@ -229,6 +268,42 @@ extension Solution {
  */
 extension Solution {
     func solveSudoku(_ board: inout [[Character]]) {
+        if board.isEmpty { return }
+
+        func isValid(_ board: [[Character]], row: Int, col: Int, c: Character) -> Bool {
+            for i in 0..<board.count {
+                // check row
+                if board[i][col] == c { return false }
+                // check column
+                if board[row][i] == c { return false }
+                // check 3*3
+                if board[3 * (row / 3) + i / 3][3 * (col / 3) + i % 3] == c { return false}
+            }
+            return true
+        }
+
+        func solve(_ board: inout [[Character]]) -> Bool {
+            for i in 0..<board.count {
+                for j in 0..<board[i].count {
+                    guard board[i][j] == "." else { continue }
+                    for ci in 1...9 {
+                        let c = Character("\(ci)")
+                        if isValid(board, row: i, col: j, c: c) {
+                            board[i][j] = c
+                            if solve(&board) {
+                                return true
+                            } else {
+                                board[i][j] = "."
+                            }
+                        }
+                    }
+                    return false
+                }
+            }
+            return true
+        }
+
+        solve(&board)
 
     }
 }
