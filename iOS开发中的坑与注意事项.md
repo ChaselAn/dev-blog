@@ -38,6 +38,8 @@
   // 三个值都需要设置
   ```
 
+* <iOS 12>在ios12中，`UIActivityIndicatorView`就算设置了isHidden = true，如果重新添加在view上，仍然会出现在界面上，并且是转动状态。iOS 13中无此问题。解决方案，isHidden = true的同时，调用stopAnimating()
+
 # Texture
 
 * ~~<version 2.6>如果给ASTextNode同时设置了maximumLine和paragraphStyle的lineSpacing，lineSpacing不会生效，可以使用lineHeightMultiple代替，或者使用ASTextNode2代替。

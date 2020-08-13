@@ -146,7 +146,11 @@
 
 新建一个 Swift 的 iOS app 项目后，我们会发现所有文件中都没有一个像 Objective-C 时那样的 main 文件，也不存在 main 函数。唯一和 main 有关系的是在默认的 AppDelegate 类的声明上方有一个 @UIApplicationMain 的标签。不说可能您也已经猜到，这个标签做的事情就是将被标注的类作为委托，去创建一个 UIApplication 并启动整个程序。在编译的时候，编译器将寻找这个标记的类，并自动插入像 main 函数这样的模板代码。
 
-# 设计模式
+### weak属性如何自动置nil的
+
+* Runtime会对weak属性进行内存布局，构建hash表：以weak属性对象内存地址为key，weak属性值(weak自身地址)为value。当对象引用计数为0 dealloc时，会将weak属性值自动置nil。
+
+## 设计模式
 
 [面向对象六大原则](<https://www.cnblogs.com/qifengshi/p/5709594.html>)
 
