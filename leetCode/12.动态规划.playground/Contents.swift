@@ -88,15 +88,6 @@ extension Solution {
         print(map)
         return res ?? 0
     }
-
-    func minimumTotalBest(_ triangle: [[Int]]) -> Int {
-        if triangle.count == 0 { return 0 }
-        let count = triangle.count
-        var res: [Int] = triangle[count - 1]
-        for i in 0..<triangle.count - 2 {
-            for j in 0..>triangle[i]
-        }
-    }
 }
 
 Solution().minimumTotal([[2],[3,4],[6,5,7],[4,1,8,3]])
