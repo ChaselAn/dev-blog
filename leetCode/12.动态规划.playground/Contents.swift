@@ -34,3 +34,69 @@ class Solution {
         return map[n] ?? 0
     }
 }
+
+// https://leetcode-cn.com/problems/triangle/
+/*
+ 120. 三角形最小路径和
+ 给定一个三角形，找出自顶向下的最小路径和。每一步只能移动到下一行中相邻的结点上。
+ 相邻的结点 在这里指的是 下标 与 上一层结点下标 相同或者等于 上一层结点下标 + 1 的两个结点。
+ 例如，给定三角形：
+
+ [
+      [2],
+     [3,4],
+    [6,5,7],
+   [4,1,8,3]
+ ]
+ 自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。
+ 说明：
+ 如果你可以只使用 O(n) 的额外空间（n 为三角形的总行数）来解决这个问题，那么你的算法会很加分。
+ */
+extension Solution {
+    func minimumTotal(_ triangle: [[Int]]) -> Int {
+        var map: [Int: [Int: Int]] = [:]
+        let count = triangle.count
+        var res: Int?
+        func cal(row: Int, col: Int) -> Int? {
+            if row < 0 || col < 0 { return nil }
+            if col > triangle[row].count - 1 { return nil }
+            let curValue = triangle[row][col]
+            let first = map[row - 1]?[col] ?? cal(row: row - 1, col: col)
+            let second = map[row - 1]?[col - 1] ?? cal(row: row - 1, col: col - 1)
+            let res: Int
+            if let first = first, let second = second {
+                res = min(first, second) + curValue
+            } else if let first = first {
+                res = first + curValue
+            } else if let second = second {
+                res = second + curValue
+            } else {
+                res = curValue
+            }
+            if var rowMap = map[row] {
+                rowMap[col] = res
+                map[row] = rowMap
+            } else {
+                map[row] = [col: res]
+            }
+            return res
+        }
+        for (index, value) in triangle[count - 1].enumerated() {
+            let cur = cal(row: count - 1, col: index) ?? value
+            res = res == nil ? cur : (cur < res! ? cur : res!)
+        }
+        print(map)
+        return res ?? 0
+    }
+
+    func minimumTotalBest(_ triangle: [[Int]]) -> Int {
+        if triangle.count == 0 { return 0 }
+        let count = triangle.count
+        var res: [Int] = triangle[count - 1]
+        for i in 0..<triangle.count - 2 {
+            for j in 0..>triangle[i]
+        }
+    }
+}
+
+Solution().minimumTotal([[2],[3,4],[6,5,7],[4,1,8,3]])
