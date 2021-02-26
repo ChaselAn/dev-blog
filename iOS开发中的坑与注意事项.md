@@ -10,8 +10,6 @@
 
 * <iOS 10>iOS10中(更低的版本可能也是这样), PHImageManager及其子类不能提前创建并引用，否则当没有相册权限时会crash。如果需要引用，建议使用lazy去懒加载，不需要引用时，需要用到时再去创建。怀疑是因为内部释放的顺序导致。
 
-* 集合类型的线程安全问题：Swift中集合类型内部并没有自带读写的线程安全，当涉及到多线程的读写时，需要自己控制线程安全。
-
 * <iOS 12>iOS12中，使用同一个webView加载不同的页面时，比如先load一个页面，然后stopLoading，重新load一个新的页面，偶现在didFailProvisionalNavigation代理中返回`Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort"`错误，并且不走didFinish的代理。处理方式：可以捕捉这个错误，进行重新reload。
 
   ```swift
@@ -28,15 +26,6 @@
   ```
 
 * <iOS 13>如果UITableViewCell中有UIActivityIndicatorView，并且当indicator正在转动的时候，该cell划出了屏幕，会调用stopAnimating方法，会导致indicator停止转动，甚至消失(前提是hidesWhenStopped为true)。解决方法：记一个状态，在cell重新出现的时候，如果需要还没转完，重新调用startAnimating方法。
-
-* <iOS 13>UITableView在reloadSections的时候，会发现contentOffset会跳动。解决方案是设置estimateheight：
-
-  ```swift
-  tableView.estimatedRowHeight = 0
-  tableView.estimatedSectionHeaderHeight = 0
-  tableView.estimatedSectionFooterHeight = 0
-  // 三个值都需要设置
-  ```
 
 * <iOS 12>在ios12中，`UIActivityIndicatorView`就算设置了isHidden = true，如果重新添加在view上，仍然会出现在界面上，并且是转动状态。iOS 13中无此问题。解决方案，isHidden = true的同时，调用stopAnimating()
 
